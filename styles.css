@@ -212,4 +212,44 @@ button:hover {
 .answer-content {
     color: #333;
     line-height: 1.5;
+}
+
+/* 인증 관련 스타일 */
+.auth-container {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 20px;
+}
+
+#whenSignedIn, #whenSignedOut {
+    padding: 10px;
+}
+
+#userDetails {
+    display: inline-block;
+    margin-right: 10px;
+    color: #666;
+}
+
+#signInBtn, #signOutBtn {
+    background-color: #4285f4;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.3s;
+}
+
+#signInBtn:hover, #signOutBtn:hover {
+    background-color: #3367d6;
+}
+
+#signOutBtn {
+    background-color: #757575;
+}
+
+#signOutBtn:hover {
+    background-color: #616161;
 } 
