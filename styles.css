@@ -2,90 +2,214 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Noto Sans KR', sans-serif;
 }
 
 body {
+    font-family: 'Noto Sans KR', sans-serif;
+    line-height: 1.6;
     background-color: #f5f5f5;
-    padding: 20px;
 }
 
 .container {
     max-width: 800px;
     margin: 0 auto;
+    padding: 20px;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+header h1 {
+    color: #333;
+    font-size: 2.5em;
+    margin: 20px 0;
+}
+
+.question-form {
     background-color: white;
     padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 30px;
 }
 
-h1 {
-    text-align: center;
-    color: #333;
+.question-form h2 {
+    color: #444;
     margin-bottom: 20px;
 }
 
-.todo-input {
+form {
     display: flex;
-    gap: 10px;
-    margin-bottom: 20px;
+    flex-direction: column;
+    gap: 15px;
 }
 
-input[type="text"] {
-    flex: 1;
+select, input, textarea {
     padding: 10px;
     border: 1px solid #ddd;
-    border-radius: 5px;
+    border-radius: 4px;
     font-size: 16px;
+}
+
+textarea {
+    min-height: 120px;
+    resize: vertical;
 }
 
 button {
-    padding: 10px 20px;
     background-color: #4CAF50;
     color: white;
+    padding: 12px;
     border: none;
-    border-radius: 5px;
+    border-radius: 4px;
     cursor: pointer;
     font-size: 16px;
+    transition: background-color 0.3s;
 }
 
 button:hover {
     background-color: #45a049;
 }
 
-.todo-list {
-    list-style: none;
+.questions-list {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
-.todo-item {
+.questions-list h2 {
+    color: #444;
+    margin-bottom: 20px;
+}
+
+.question-item {
+    border-bottom: 1px solid #eee;
+    padding: 15px 0;
+}
+
+.question-item:last-child {
+    border-bottom: none;
+}
+
+.question-header {
     display: flex;
-    align-items: center;
-    padding: 10px;
-    background-color: #f9f9f9;
-    margin-bottom: 5px;
-    border-radius: 5px;
+    justify-content: space-between;
+    margin-bottom: 10px;
 }
 
-.todo-item.completed {
-    background-color: #e0e0e0;
-}
-
-.todo-item.completed span {
-    text-decoration: line-through;
-    color: #888;
-}
-
-.todo-item span {
-    flex: 1;
-    margin: 0 10px;
-}
-
-.delete-btn {
-    background-color: #ff4444;
-    padding: 5px 10px;
+.question-subject {
+    background-color: #e9ecef;
+    padding: 3px 8px;
+    border-radius: 4px;
     font-size: 14px;
 }
 
-.delete-btn:hover {
-    background-color: #cc0000;
+.question-title {
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 8px;
+}
+
+.question-content {
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.answers {
+    margin-left: 20px;
+    padding-left: 20px;
+    border-left: 3px solid #eee;
+}
+
+.answer-form {
+    margin-top: 10px;
+}
+
+.answer-form textarea {
+    min-height: 80px;
+}
+
+/* 알림 스타일 */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 25px;
+    background-color: #4CAF50;
+    color: white;
+    border-radius: 4px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    transform: translateX(200%);
+    transition: transform 0.3s ease-in-out;
+    z-index: 1000;
+}
+
+.notification.show {
+    transform: translateX(0);
+}
+
+.notification.error {
+    background-color: #f44336;
+}
+
+/* 프로세스 표시 스타일 */
+.process-steps {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
+.step {
+    display: flex;
+    align-items: center;
+    color: #666;
+}
+
+.step.active {
+    color: #4CAF50;
+    font-weight: bold;
+}
+
+.step-number {
+    width: 24px;
+    height: 24px;
+    background-color: #ddd;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+    font-size: 14px;
+}
+
+.step.active .step-number {
+    background-color: #4CAF50;
+}
+
+/* 답변 스타일 개선 */
+.answer-item {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+}
+
+.answer-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 0.9em;
+    color: #666;
+}
+
+.answer-content {
+    color: #333;
+    line-height: 1.5;
 } 
