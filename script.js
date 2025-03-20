@@ -62,7 +62,7 @@ Object.keys(inputs).forEach(key => {
 });
 
 // 폼 제출 이벤트 처리
-questionForm.addEventListener('submit', function(e) {
+questionForm.addEventListener('submit', async function(e) {
     e.preventDefault();
     
     // 폼 데이터 가져오기
@@ -72,118 +72,141 @@ questionForm.addEventListener('submit', function(e) {
     
     // 새 질문 객체 생성
     const question = {
-        id: Date.now(),
         subject: subject,
         title: title,
         content: content,
         answers: [],
-        timestamp: new Date().toLocaleString()
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
     };
     
-    // 질문을 배열에 추가
-    questions.unshift(question);
-    
-    // 질문 목록 업데이트
-    updateQuestionsList();
-    
-    // 폼 초기화
-    questionForm.reset();
-    steps.forEach(step => step.classList.remove('active'));
-    steps[0].classList.add('active');
-    
-    // 성공 알림 표시
-    showNotification('질문이 성공적으로 등록되었습니다!');
+    try {
+        // 데이터 유효성 검사
+        if (!subject || !title || !content) {
+            throw new Error('모든 필드를 입력해주세요.');
+        }
+        
+        // Firestore에 질문 추가
+        await db.collection('questions').add(question);
+        
+        // 폼 초기화
+        questionForm.reset();
+        steps.forEach(step => step.classList.remove('active'));
+        steps[0].classList.add('active');
+        
+        // 성공 알림 표시
+        showNotification('질문이 성공적으로 등록되었습니다!');
+        
+        // 질문 목록 새로고침
+        loadQuestions();
+    } catch (error) {
+        console.error('질문 등록 오류:', error);
+        showNotification(error.message || '질문 등록에 실패했습니다.', true);
+    }
 });
 
-// 질문 목록 업데이트 함수
-function updateQuestionsList() {
-    questionsListDiv.innerHTML = '';
-    
-    questions.forEach(question => {
-        const questionElement = document.createElement('div');
-        questionElement.className = 'question-item';
+// 질문 목록 로드 함수
+async function loadQuestions() {
+    try {
+        const snapshot = await db.collection('questions')
+            .orderBy('timestamp', 'desc')
+            .get();
         
-        questionElement.innerHTML = `
-            <div class="question-header">
-                <span class="question-subject">${question.subject}</span>
-                <span class="question-date">${question.timestamp}</span>
-            </div>
-            <div class="question-title">${question.title}</div>
-            <div class="question-content">${question.content}</div>
-            <div class="answers">
-                ${question.answers.map(answer => `
-                    <div class="answer-item">
-                        <div class="answer-header">
-                            <span class="answer-date">${answer.timestamp}</span>
+        questionsListDiv.innerHTML = '';
+        
+        snapshot.forEach(doc => {
+            const question = doc.data();
+            const questionElement = document.createElement('div');
+            questionElement.className = 'question-item';
+            
+            questionElement.innerHTML = `
+                <div class="question-header">
+                    <span class="question-subject">${question.subject}</span>
+                    <span class="question-date">${question.timestamp ? new Date(question.timestamp.toDate()).toLocaleString() : '날짜 없음'}</span>
+                </div>
+                <div class="question-title">${question.title}</div>
+                <div class="question-content">${question.content}</div>
+                <div class="answers">
+                    ${(question.answers || []).map(answer => `
+                        <div class="answer-item">
+                            <div class="answer-header">
+                                <span class="answer-date">${new Date(answer.timestamp.toDate()).toLocaleString()}</span>
+                            </div>
+                            <div class="answer-content">${answer.content}</div>
                         </div>
-                        <div class="answer-content">${answer.content}</div>
-                    </div>
-                `).join('')}
-            </div>
-            <div class="answer-form">
-                <textarea placeholder="답변을 작성해주세요." class="answer-input"></textarea>
-                <button onclick="addAnswer(${question.id})">답변 등록</button>
-            </div>
-        `;
-        
-        questionsListDiv.appendChild(questionElement);
-    });
+                    `).join('')}
+                </div>
+                <div class="answer-form">
+                    <textarea placeholder="답변을 작성해주세요." class="answer-input"></textarea>
+                    <button onclick="addAnswer('${doc.id}')">답변 등록</button>
+                </div>
+            `;
+            
+            questionsListDiv.appendChild(questionElement);
+        });
+    } catch (error) {
+        console.error('질문 목록 로드 오류:', error);
+        showNotification('질문 목록을 불러오는데 실패했습니다.', true);
+    }
 }
 
 // 답변 추가 함수
-function addAnswer(questionId) {
-    const question = questions.find(q => q.id === questionId);
-    if (!question) return;
-    
+async function addAnswer(questionId) {
     const answerElement = event.target.parentElement.querySelector('.answer-input');
     const answerContent = answerElement.value.trim();
     
-    if (answerContent) {
+    if (!answerContent) {
+        showNotification('답변 내용을 입력해주세요.', true);
+        return;
+    }
+    
+    try {
         const answer = {
             content: answerContent,
-            timestamp: new Date().toLocaleString()
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
         };
         
-        question.answers.push(answer);
-        updateQuestionsList();
+        // Firestore 문서 참조 가져오기
+        const questionRef = db.collection('questions').doc(questionId);
+        
+        // 답변 배열에 새 답변 추가
+        await questionRef.update({
+            answers: firebase.firestore.FieldValue.arrayUnion(answer)
+        });
+        
+        // 입력 필드 초기화
         answerElement.value = '';
         
         // 성공 알림 표시
         showNotification('답변이 성공적으로 등록되었습니다!');
-    } else {
-        // 오류 알림 표시
-        showNotification('답변 내용을 입력해주세요.', true);
+        
+        // 질문 목록 새로고침
+        loadQuestions();
+    } catch (error) {
+        console.error('답변 등록 오류:', error);
+        const errorMessage = error.code === 'permission-denied' 
+            ? '답변 권한이 없습니다.' 
+            : '답변 등록에 실패했습니다.';
+        showNotification(errorMessage, true);
     }
 }
 
-// 로컬 스토리지에서 데이터 불러오기
-function loadFromLocalStorage() {
-    const savedQuestions = localStorage.getItem('questions');
-    if (savedQuestions) {
-        questions = JSON.parse(savedQuestions);
-        updateQuestionsList();
-    }
+// 실시간 업데이트 설정
+function setupRealtimeUpdates() {
+    db.collection('questions')
+        .orderBy('timestamp', 'desc')
+        .onSnapshot(snapshot => {
+            snapshot.docChanges().forEach(change => {
+                if (change.type === 'added' || change.type === 'modified') {
+                    loadQuestions();
+                }
+            });
+        }, error => {
+            console.error('실시간 업데이트 오류:', error);
+        });
 }
 
-// 로컬 스토리지에 데이터 저장
-function saveToLocalStorage() {
-    localStorage.setItem('questions', JSON.stringify(questions));
-}
-
-// 질문이나 답변이 추가될 때마다 로컬 스토리지 업데이트
-const originalPush = Array.prototype.push;
-Array.prototype.push = function() {
-    const result = originalPush.apply(this, arguments);
-    saveToLocalStorage();
-    return result;
-};
-
-const originalUnshift = Array.prototype.unshift;
-Array.prototype.unshift = function() {
-    const result = originalUnshift.apply(this, arguments);
-    saveToLocalStorage();
-    return result;
-};
-
-// 페이지 로드 시 저장된 데이터 불러오기
-loadFromLocalStorage();
+// 페이지 로드 시 초기화
+document.addEventListener('DOMContentLoaded', () => {
+    loadQuestions();
+    setupRealtimeUpdates();
+});
