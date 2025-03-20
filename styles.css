@@ -1,0 +1,93 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background-color: #f5f5f5;
+    color: #333;
+    line-height: 1.6;
+}
+
+.container {
+    max-width: 800px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+h1 {
+    color: #2c3e50;
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.date {
+    color: #7f8c8d;
+    font-size: 1.1rem;
+}
+
+.meal-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    margin-bottom: 2rem;
+}
+
+.meal-time {
+    background: #3498db;
+    color: white;
+    padding: 1rem;
+    text-align: center;
+}
+
+.meal-time h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+.meal-content {
+    padding: 2rem;
+}
+
+.meal-list {
+    list-style: none;
+}
+
+.meal-list li {
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #eee;
+    color: #2c3e50;
+}
+
+.meal-list li:last-child {
+    border-bottom: none;
+}
+
+footer {
+    text-align: center;
+    color: #7f8c8d;
+    font-size: 0.9rem;
+    margin-top: 2rem;
+}
+
+@media (max-width: 600px) {
+    .container {
+        margin: 1rem auto;
+    }
+    
+    h1 {
+        font-size: 2rem;
+    }
+    
+    .meal-card {
+        border-radius: 10px;
+    }
+} 
